@@ -4,8 +4,9 @@ Simple go program to find Drone releases (promote events) within a given time ra
 
 ## :arrow_heading_down: Installation
 
+`go install github.com/Lowess/drone-release-tracker@latest`
 
-Grab the binary on the release page: [drone-release-tracker](https://github.com/Lowess/drone-release-tracker/releases/download/v1.0.0/drone-release-tracker)
+Or grab the binary on the release page: [drone-release-tracker](https://github.com/Lowess/drone-release-tracker/releases/download/v1.0.1/drone-release-tracker)
 
 
 
