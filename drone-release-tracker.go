@@ -26,7 +26,7 @@ import (
 var (
 	fromFlag   = flag.String("from", getQuarterStartDate(time.Now()).Format("2006-01-02"), "Releases after this date will be included")
 	toFlag     = flag.String("to", getQuarterEndDate(time.Now()).Format("2006-01-02"), "Releases before this date will be included")
-	repoFlag   = flag.String("repo", "octocat/demo", "Name of the repository to list releases for")
+	reposFlag  = flag.String("repos", "octocat/demo", "Name of the repository to list releases for")
 	outputFlag = flag.String("output", "png", "Output format (json, png, jpeg, gif, svg)")
 )
 
@@ -192,15 +192,21 @@ func main() {
 	fromDate, _ := time.Parse("2006-01-02", *fromFlag)
 	toDate, _ := time.Parse("2006-01-02", *toFlag)
 
-	droneRepo := DroneRepo(*repoFlag)
+	droneRepos := DroneRepo(*reposFlag)
 
-	namespace, name, err := droneRepo.Split("/")
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "error: %v\n", err)
-		os.Exit(1)
+	var releases []*drone.Build
+
+	// Loop through a list of CSV repos and find all releases within date range
+	for _, droneRepo := range strings.Split(string(droneRepos), ",") {
+		namespace, name, err := DroneRepo(droneRepo).Split("/")
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "error: %v\n", err)
+			os.Exit(1)
+		}
+
+		// Extend releases array with releases from this repo
+		releases = append(releases, findAllReleasesWithinRange(client, namespace, name, fromDate, toDate, 1)...)
 	}
-
-	releases := findAllReleasesWithinRange(client, namespace, name, fromDate, toDate, 1)
 
 	heatmapData := make(map[string]int)
 	for _, build := range releases {
